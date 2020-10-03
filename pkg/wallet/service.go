@@ -34,7 +34,7 @@ func (s *Service) RegisterAccount(phone types.Phone) (*types.Account, error)  {
 	account := &types.Account {
 		ID: s.nextAccountID,
 		Phone: phone,
-		Balance: 110,
+		Balance: 0,
 	}
 	s.accounts = append(s.accounts, account)
 
