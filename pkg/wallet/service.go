@@ -2,10 +2,9 @@ package wallet
 
 
 import (
+	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
-	"wallet/pkg/types"
-	
 )
 
 var ErrPhoneRegistered = errors.New("phone already registered")
