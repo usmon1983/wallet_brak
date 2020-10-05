@@ -5,6 +5,16 @@ import (
 	"github.com/usmon1983/wallet/pkg/types"
 )
 
+func TestService_RegisterAccount_success(t *testing.T) {
+	svc := Service{}
+	svc.RegisterAccount("+9920000001")
+
+	account, err := svc.FindAccountByID(1)
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", account)
+	}
+}
+
 func TestService_RegisterAccount_unsuccess(t *testing.T) {
 	vc := Service{}
 
@@ -149,7 +159,6 @@ func TestService_FavoritePayment_success(t *testing.T) {
 		t.Errorf("FavoritePayment(): Error(): can't create favorite payment(%v): %v", favoritePay.Name, err)
 	}
 }
-
 
 func TestService_PayFromFavorite_success(t *testing.T) {
 	vc := Service{}
