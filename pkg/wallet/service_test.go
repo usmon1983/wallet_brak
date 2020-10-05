@@ -1,10 +1,7 @@
 package wallet
 
 import (
-	//"fmt"
-	//"reflect"
 	"testing"
-	//"github.com/google/uuid"
 	"github.com/usmon1983/wallet/pkg/types"
 )
 
@@ -92,54 +89,13 @@ func TestService_Reject_fail(t *testing.T) {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	editPayID := pay.ID + "mr.virus :)"
+	editPayID := pay.ID + "edit :)"
 	err = svc.Reject(editPayID)
 	if err == nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 }
-/*
-func TestService_FindPaymentByID_success(t *testing.T) {
-	s := Service{}
 
-	_, payments, err := s.addAccount(defaultTestAccount)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	payment := payments[0]
-	got, err := s.FindPaymentByID(payment.ID)
-	if err != nil {
-		t.Errorf("FindPaymentByID(): error = %v", err)
-		return
-	}
-
-	if !reflect.DeepEqual(payment, got) {
-		t.Errorf("FindPaymentByID(): wrong payment returned = %v", err)
-	}
-}
-
-func TestService_FindPaymentByID_fail(t *testing.T) {
-	s := newTestService()
-	_, _, err := s.addAccount(defaultTestAccount)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	_, err = s.FindPaymentByID(uuid.New().String())
-	if err == nil {
-		t.Errorf("FindPaymentByID(): must return error, returned nil")
-		return
-	}
-
-	if err != ErrPaymentNotFound {
-		t.Errorf("FindPaymentByID(): must return ErrPaymentNotFound, returned = %v", err)
-		return
-	}
-}
-*/
 func TestService_Repeat_success(t *testing.T) {
 	svc := Service{}
 	svc.RegisterAccount("+9920000001")
