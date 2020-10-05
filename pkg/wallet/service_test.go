@@ -26,102 +26,156 @@ func TestService_RegisterAccount_unsuccess(t *testing.T) {
 }
 
 func TestService_FindAccoundById_Method_NotFound(t *testing.T) {
-	svc := Service{}
-	svc.RegisterAccount("+9920000001")
+	vc := Service{}
+	vc.RegisterAccount("+9920000001")
 
-	account, err := svc.FindAccountByID(3)
+	account, err := vc.FindAccountByID(3)
 	if err == nil {
 		t.Errorf("\ngot > %v \nwant > nil", account)
 	}
 }
 
 func TestService_Reject_success(t *testing.T) {
-	svc := Service{}
-	svc.RegisterAccount("+9920000001")
+	vc := Service{}
+	vc.RegisterAccount("+9920000001")
 
-	account, err := svc.FindAccountByID(1)
+	account, err := vc.FindAccountByID(1)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	err = svc.Deposit(account.ID, 1000_00)
+	err = vc.Deposit(account.ID, 1000_00)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	payment, err := svc.Pay(account.ID, 100_00, "auto")
+	payment, err := vc.Pay(account.ID, 100_00, "auto")
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	pay, err := svc.FindPaymentByID(payment.ID)
+	pay, err := vc.FindPaymentByID(payment.ID)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	err = svc.Reject(pay.ID)
+	err = vc.Reject(pay.ID)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 }
 
 func TestService_Reject_fail(t *testing.T) {
-	svc := Service{}
-	svc.RegisterAccount("+9920000001")
+	vc := Service{}
+	vc.RegisterAccount("+9920000001")
 
-	account, err := svc.FindAccountByID(1)
+	account, err := vc.FindAccountByID(1)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	err = svc.Deposit(account.ID, 1000_00)
+	err = vc.Deposit(account.ID, 1000_00)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	payment, err := svc.Pay(account.ID, 100_00, "auto")
+	payment, err := vc.Pay(account.ID, 100_00, "auto")
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	pay, err := svc.FindPaymentByID(payment.ID)
+	pay, err := vc.FindPaymentByID(payment.ID)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
 	editPayID := pay.ID + "edit :)"
-	err = svc.Reject(editPayID)
+	err = vc.Reject(editPayID)
 	if err == nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 }
 
 func TestService_Repeat_success(t *testing.T) {
-	svc := Service{}
-	svc.RegisterAccount("+9920000001")
+	vc := Service{}
+	vc.RegisterAccount("+9920000001")
 
-	account, err := svc.FindAccountByID(1)
+	account, err := vc.FindAccountByID(1)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	err = svc.Deposit(account.ID, 1000_00)
+	err = vc.Deposit(account.ID, 1000_00)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	payment, err := svc.Pay(account.ID, 100_00, "auto")
+	payment, err := vc.Pay(account.ID, 100_00, "auto")
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	pay, err := svc.FindPaymentByID(payment.ID)
+	pay, err := vc.FindPaymentByID(payment.ID)
 	if err != nil {
 		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	pay, err = svc.Repeat(pay.ID)
+	pay, err = vc.Repeat(pay.ID)
 	if err != nil {
 		t.Errorf("Repeat(): Error(): can't pay for an account(%v): %v", pay.ID, err)
+	}
+}
+
+func TestService_FavoritePayment_success(t *testing.T) {
+	vc := Service{}
+
+	account, err := vc.RegisterAccount("+9920000001")
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	err = vc.Deposit(account.ID, 1000_00)
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	payment, err := vc.Pay(account.ID, 100_00, "babilon-m")
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	favoritePay, err := vc.FavoritePayment(payment.ID, "MyFavoritePayment")
+	if err != nil {
+		t.Errorf("FavoritePayment(): Error(): can't create favorite payment(%v): %v", favoritePay.Name, err)
+	}
+}
+
+
+func TestService_PayFromFavorite_success(t *testing.T) {
+	vc := Service{}
+	
+	account, err := vc.RegisterAccount("+9920000001")
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	err = vc.Deposit(account.ID, 1000_00)
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	payment, err := vc.Pay(account.ID, 100_00, "babilon-m")
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	favoritePay, err := vc.FavoritePayment(payment.ID, "MyFavoritePayment")
+	if err != nil {
+		t.Errorf("FavoritePayment(): Error(): can't create favorite payment(%v): %v", favoritePay.ID, err)
+	}
+
+	payFromFavorite, err := vc.PayFromFavorite(favoritePay.ID)
+	if err != nil {
+		t.Errorf("PayFromFavorite(): Error(): can't create payment from favorite(%v): %v", payFromFavorite, err)
 	}
 }
