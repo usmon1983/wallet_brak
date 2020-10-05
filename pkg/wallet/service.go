@@ -2,7 +2,7 @@ package wallet
 
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
@@ -25,14 +25,14 @@ type Error string
 func (e Error) Error() string  {
 	return string(e)
 }
-
+/*
 type testService struct {
 	*Service
 }
 
 func newTestService() *testService  {
 	return &testService{Service: &Service{}}
-}
+}*/
 
 type testAccount struct {
 	phone types.Phone
@@ -166,7 +166,7 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error)  {
 	}
 	return nil, ErrPaymentNotFound
 }
-
+/*
 func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error)  {
 	//регистрируем там пользователя
 	account, err := s.RegisterAccount(data.phone)
@@ -193,8 +193,8 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 	
 	return account, payments, nil
 }
-
-func (s *testService) Repeat(paymentID string) (*types.Payment, error)  {
+*/
+func (s *Service) Repeat(paymentID string) (*types.Payment, error)  {
 	payment, err := s.FindPaymentByID(paymentID)
 	if err != nil {
 		return nil, err
