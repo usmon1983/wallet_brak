@@ -2,7 +2,7 @@ package wallet
 
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
@@ -25,14 +25,14 @@ type Error string
 func (e Error) Error() string  {
 	return string(e)
 }
-
+/*
 type testService struct {
 	*Service
 }
 
 func newTestService() *testService  {
 	return &testService{Service: &Service{}}
-}
+}*/
 
 type testAccount struct {
 	phone types.Phone
@@ -147,33 +147,12 @@ func (s *Service) Reject(paymentID string) error  {
 	if err != nil {
 		return err
 	}
-	/*var targetPayment *types.Payment
-	for _, payment := range s.payments {
-		if payment.ID == paymentID {
-			targetPayment = payment
-			break
-		}
-	}
-	if targetPayment == nil {
-		return ErrPaymentNotFound
-	}*/
-
+	
 	account, err := s.FindAccountByID(payment.AccountID)
 	if err != nil {
 		return nil
 	}
-	/*
-	var targetAccount *types.Account
-	for _, account := range s.accounts {
-		if account.ID == targetPayment.AccountID {
-			targetAccount = account
-			break
-		}
-	}
-	if targetAccount == nil {
-		return ErrAccountNotFound
-	}*/
-
+	
 	payment.Status = types.PaymentStatusFail
 	account.Balance += payment.Amount
 	return nil
@@ -187,23 +166,7 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error)  {
 	}
 	return nil, ErrPaymentNotFound
 }
-
-func (s *testService) addAccountWithBalance(phone types.Phone, balance types.Money) (*types.Account, error)  {
-	//регистрируем там пользователя
-	account, err := s.RegisterAccount(phone)
-	if err != nil {
-		return nil, fmt.Errorf("can't register account, error = %v", err)
-	}
-
-	//пополняем его счет
-	err = s.Deposit(account.ID, balance)
-	if err != nil {
-		return nil, fmt.Errorf("can't deposit account, error = %v", err)
-	}
-
-	return account, nil
-}
-
+/*
 func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error)  {
 	//регистрируем там пользователя
 	account, err := s.RegisterAccount(data.phone)
@@ -230,8 +193,8 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 	
 	return account, payments, nil
 }
-
-func (s *testService) Repeat(paymentID string) (*types.Payment, error)  {
+*/
+func (s *Service) Repeat(paymentID string) (*types.Payment, error)  {
 	payment, err := s.FindPaymentByID(paymentID)
 	if err != nil {
 		return nil, err
