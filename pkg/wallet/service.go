@@ -17,6 +17,7 @@ type Service struct {
 	nextAccountID int64 //Для генерации уникального номера аккаунта
 	accounts []*types.Account
 	payments []*types.Payment
+	favorites []*types.Favorite
 }
 
 type Error string
@@ -149,4 +150,34 @@ func (s *Service) Repeat(paymentID string) (*types.Payment, error)  {
 	}
 
 	return repeatPayment, nil
+}
+
+func (s *Service) FavoritePayment(paymentID string, name string) (*types.Favorite, error)  {
+	payment, err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil, err
+	}
+	favoriteID := uuid.New().String()
+	favorite := &types.Favorite {
+		ID: favoriteID,
+		AccountID: payment.AccountID,
+		Name: name,
+		Amount: payment.Amount,
+		Category: payment.Category,
+	}
+	s.favorites = append(s.favorites, favorite)
+	return favorite, nil
+}
+
+func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error)  {
+	favoritePayment, err := s.FindPaymentByID(favoriteID)
+	if err != nil {
+		return nil, err
+	}
+	payFavorite, err := s.Pay(favoritePayment.AccountID, favoritePayment.Amount, favoritePayment.Category)
+	if err != nil {
+		return nil, err
+	}
+
+	return payFavorite, nil
 }
