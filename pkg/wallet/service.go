@@ -2,7 +2,6 @@ package wallet
 
 
 import (
-	//"fmt"
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
@@ -25,14 +24,6 @@ type Error string
 func (e Error) Error() string  {
 	return string(e)
 }
-/*
-type testService struct {
-	*Service
-}
-
-func newTestService() *testService  {
-	return &testService{Service: &Service{}}
-}*/
 
 type testAccount struct {
 	phone types.Phone
@@ -166,34 +157,7 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error)  {
 	}
 	return nil, ErrPaymentNotFound
 }
-/*
-func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error)  {
-	//регистрируем там пользователя
-	account, err := s.RegisterAccount(data.phone)
-	if err != nil {
-		return nil, nil, fmt.Errorf("can't register account, error = %v", err)
-	}
 
-	//пополняем его счет
-	err = s.Deposit(account.ID, data.balance)
-	if err != nil {
-		return nil, nil, fmt.Errorf("can't deposit account, error = %v", err)
-	}
-
-	//выполняем платежи
-	//можем создать слайс сразу нужной длины, поскольку знаем размер
-	payments := make([]*types.Payment, len(data.payments))
-	for i, payment := range data.payments {
-		//тогда здесь работаем просто через индекс, а не через append
-		payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
-		if err != nil {
-			return nil, nil, fmt.Errorf("can't make payment, error = %v", err)
-		}	
-	}
-	
-	return account, payments, nil
-}
-*/
 func (s *Service) Repeat(paymentID string) (*types.Payment, error)  {
 	payment, err := s.FindPaymentByID(paymentID)
 	if err != nil {
