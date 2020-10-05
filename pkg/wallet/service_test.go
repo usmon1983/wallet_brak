@@ -1,17 +1,17 @@
 package wallet
 
-
 import (
-	"github.com/google/uuid"
+	"fmt"
 	"reflect"
-	"github.com/usmon1983/wallet/pkg/types"
 	"testing"
+	"github.com/google/uuid"
+	"github.com/usmon1983/wallet/pkg/types"
 )
 
-func TestService_RegisterAccount_unsuccess(t *testing.T)  {
+func TestService_RegisterAccount_unsuccess(t *testing.T) {
 	vc := Service{}
 
-	accounts := []types.Account {
+	accounts := []types.Account{
 		{ID: 1, Phone: "+992000000001", Balance: 2_000_00},
 		{ID: 2, Phone: "+992000000002", Balance: 3_000_00},
 		{ID: 3, Phone: "+992000000003", Balance: 4_000_00},
@@ -28,7 +28,6 @@ func TestService_RegisterAccount_unsuccess(t *testing.T)  {
 	}
 }
 
-
 func TestService_FindAccoundById_Method_NotFound(t *testing.T) {
 	svc := Service{}
 	svc.RegisterAccount("+9920000001")
@@ -39,7 +38,7 @@ func TestService_FindAccoundById_Method_NotFound(t *testing.T) {
 	}
 }
 
-func TestService_Reject_success(t *testing.T)  {
+func TestService_Reject_success(t *testing.T) {
 	s := newTestService()
 	_, payments, err := s.addAccount(defaultTestAccount)
 	if err != nil {
@@ -47,7 +46,7 @@ func TestService_Reject_success(t *testing.T)  {
 		return
 	}
 
-	payment := payments[0] 
+	payment := payments[0]
 	err = s.Reject(payment.ID)
 	if err != nil {
 		t.Errorf("Reject(): error = %v", err)
@@ -75,7 +74,7 @@ func TestService_Reject_success(t *testing.T)  {
 	}
 }
 
-func TestService_FindPaymentByID_success(t *testing.T)  {
+func TestService_FindPaymentByID_success(t *testing.T) {
 	s := newTestService()
 
 	_, payments, err := s.addAccount(defaultTestAccount)
@@ -85,18 +84,18 @@ func TestService_FindPaymentByID_success(t *testing.T)  {
 	}
 
 	payment := payments[0]
-	got, err := s.FindPaymentByID(payment.ID) 
+	got, err := s.FindPaymentByID(payment.ID)
 	if err != nil {
 		t.Errorf("FindPaymentByID(): error = %v", err)
 		return
-	} 
+	}
 
 	if !reflect.DeepEqual(payment, got) {
 		t.Errorf("FindPaymentByID(): wrong payment returned = %v", err)
 	}
 }
 
-func TestService_FindPaymentByID_fail(t *testing.T)  {
+func TestService_FindPaymentByID_fail(t *testing.T) {
 	s := newTestService()
 	_, _, err := s.addAccount(defaultTestAccount)
 	if err != nil {
@@ -108,10 +107,28 @@ func TestService_FindPaymentByID_fail(t *testing.T)  {
 	if err == nil {
 		t.Errorf("FindPaymentByID(): must return error, returned nil")
 		return
-	} 
+	}
 
 	if err != ErrPaymentNotFound {
 		t.Errorf("FindPaymentByID(): must return ErrPaymentNotFound, returned = %v", err)
 		return
 	}
+}
+
+func TestService_Repeat_success(t *testing.T) {
+	s := newTestService()
+
+	_, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	payment := payments[0]
+	repeatPayment, err := s.Repeat(payment.ID)
+	if err != nil {
+		t.Errorf("Repeat(): error = %v", err)
+		return
+	}
+	fmt.Println(repeatPayment)
 }
