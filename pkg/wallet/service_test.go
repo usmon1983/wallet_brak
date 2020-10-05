@@ -1,10 +1,7 @@
 package wallet
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
-	"github.com/google/uuid"
 	"github.com/usmon1983/wallet/pkg/types"
 )
 
@@ -39,96 +36,92 @@ func TestService_FindAccoundById_Method_NotFound(t *testing.T) {
 }
 
 func TestService_Reject_success(t *testing.T) {
-	s := newTestService()
-	_, payments, err := s.addAccount(defaultTestAccount)
+	svc := Service{}
+	svc.RegisterAccount("+9920000001")
+
+	account, err := svc.FindAccountByID(1)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	payment := payments[0]
-	err = s.Reject(payment.ID)
+	err = svc.Deposit(account.ID, 1000_00)
 	if err != nil {
-		t.Errorf("Reject(): error = %v", err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	savedPayment, err := s.FindPaymentByID(payment.ID)
+	payment, err := svc.Pay(account.ID, 100_00, "auto")
 	if err != nil {
-		t.Errorf("Reject(): can't find payment by id, error = %v", err)
-		return
-	}
-	if savedPayment.Status != types.PaymentStatusFail {
-		t.Errorf("Reject(): status didn't changed, payment = %v", savedPayment)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	savedAccount, err := s.FindAccountByID(payment.AccountID)
+	pay, err := svc.FindPaymentByID(payment.ID)
 	if err != nil {
-		t.Errorf("Reject(): can't find account by id, error = %v", err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
-	if savedAccount.Balance != defaultTestAccount.balance {
-		t.Errorf("Reject(): balance didn't changed, account = %v", savedAccount)
-		return
+
+	err = svc.Reject(pay.ID)
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 }
 
-func TestService_FindPaymentByID_success(t *testing.T) {
-	s := newTestService()
+func TestService_Reject_fail(t *testing.T) {
+	svc := Service{}
+	svc.RegisterAccount("+9920000001")
 
-	_, payments, err := s.addAccount(defaultTestAccount)
+	account, err := svc.FindAccountByID(1)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	payment := payments[0]
-	got, err := s.FindPaymentByID(payment.ID)
+	err = svc.Deposit(account.ID, 1000_00)
 	if err != nil {
-		t.Errorf("FindPaymentByID(): error = %v", err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	if !reflect.DeepEqual(payment, got) {
-		t.Errorf("FindPaymentByID(): wrong payment returned = %v", err)
-	}
-}
-
-func TestService_FindPaymentByID_fail(t *testing.T) {
-	s := newTestService()
-	_, _, err := s.addAccount(defaultTestAccount)
+	payment, err := svc.Pay(account.ID, 100_00, "auto")
 	if err != nil {
-		t.Error(err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	_, err = s.FindPaymentByID(uuid.New().String())
+	pay, err := svc.FindPaymentByID(payment.ID)
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	editPayID := pay.ID + "edit :)"
+	err = svc.Reject(editPayID)
 	if err == nil {
-		t.Errorf("FindPaymentByID(): must return error, returned nil")
-		return
-	}
-
-	if err != ErrPaymentNotFound {
-		t.Errorf("FindPaymentByID(): must return ErrPaymentNotFound, returned = %v", err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 }
 
 func TestService_Repeat_success(t *testing.T) {
-	s := newTestService()
+	svc := Service{}
+	svc.RegisterAccount("+9920000001")
 
-	_, payments, err := s.addAccount(defaultTestAccount)
+	account, err := svc.FindAccountByID(1)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
 
-	payment := payments[0]
-	repeatPayment, err := s.Repeat(payment.ID)
+	err = svc.Deposit(account.ID, 1000_00)
 	if err != nil {
-		t.Errorf("Repeat(): error = %v", err)
-		return
+		t.Errorf("\ngot > %v \nwant > nil", err)
 	}
-	fmt.Println(repeatPayment)
+
+	payment, err := svc.Pay(account.ID, 100_00, "auto")
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	pay, err := svc.FindPaymentByID(payment.ID)
+	if err != nil {
+		t.Errorf("\ngot > %v \nwant > nil", err)
+	}
+
+	pay, err = svc.Repeat(pay.ID)
+	if err != nil {
+		t.Errorf("Repeat(): Error(): can't pay for an account(%v): %v", pay.ID, err)
+	}
 }
