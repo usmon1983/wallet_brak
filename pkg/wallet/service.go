@@ -25,27 +25,6 @@ func (e Error) Error() string  {
 	return string(e)
 }
 
-type testAccount struct {
-	phone types.Phone
-	balance types.Money
-	payments []struct {
-		amount types.Money
-		category types.PaymentCategory
-	}
-}
-
-var defaultTestAccount = testAccount {
-	phone: "+992000000001",
-	balance: 10_000_00,
-	payments: []struct {
-		amount types.Money
-		category types.PaymentCategory
-	}{
-		{amount: 1_000_00, category: "auto"},
-	},
-}
-
-
 func (s *Service) RegisterAccount(phone types.Phone) (*types.Account, error)  {
 	for _, account := range s.accounts {
 		if account.Phone == phone {
