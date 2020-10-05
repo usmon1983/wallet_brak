@@ -2,7 +2,6 @@ package wallet
 
 
 import (
-	//"fmt"
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
@@ -18,6 +17,7 @@ type Service struct {
 	nextAccountID int64 //Для генерации уникального номера аккаунта
 	accounts []*types.Account
 	payments []*types.Payment
+	favorites []*types.Favorite
 }
 
 type Error string
@@ -25,35 +25,6 @@ type Error string
 func (e Error) Error() string  {
 	return string(e)
 }
-/*
-type testService struct {
-	*Service
-}
-
-func newTestService() *testService  {
-	return &testService{Service: &Service{}}
-}*/
-
-type testAccount struct {
-	phone types.Phone
-	balance types.Money
-	payments []struct {
-		amount types.Money
-		category types.PaymentCategory
-	}
-}
-
-var defaultTestAccount = testAccount {
-	phone: "+992000000001",
-	balance: 10_000_00,
-	payments: []struct {
-		amount types.Money
-		category types.PaymentCategory
-	}{
-		{amount: 1_000_00, category: "auto"},
-	},
-}
-
 
 func (s *Service) RegisterAccount(phone types.Phone) (*types.Account, error)  {
 	for _, account := range s.accounts {
@@ -167,6 +138,7 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error)  {
 	return nil, ErrPaymentNotFound
 }
 
+
 func (s *Service) Repeat(paymentID string) (*types.Payment, error)  {
 	payment, err := s.FindPaymentByID(paymentID)
 	if err != nil {
@@ -179,4 +151,34 @@ func (s *Service) Repeat(paymentID string) (*types.Payment, error)  {
 	}
 
 	return repeatPayment, nil
+}
+
+func (s *Service) FavoritePayment(paymentID string, name string) (*types.Favorite, error)  {
+	payment, err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil, err
+	}
+	favoriteID := uuid.New().String()
+	favorite := &types.Favorite {
+		ID: favoriteID,
+		AccountID: payment.AccountID,
+		Name: name,
+		Amount: payment.Amount,
+		Category: payment.Category,
+	}
+	s.favorites = append(s.favorites, favorite)
+	return favorite, nil
+}
+
+func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error)  {
+	favoritePayment, err := s.FindPaymentByID(favoriteID)
+	if err != nil {
+		return nil, err
+	}
+	payFavorite, err := s.Pay(favoritePayment.AccountID, favoritePayment.Amount, favoritePayment.Category)
+	if err != nil {
+		return nil, err
+	}
+
+	return payFavorite, nil
 }
