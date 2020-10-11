@@ -8,6 +8,7 @@ import (
 	"os"
 	"log"
 	"strconv"
+	"fmt"
 )
 
 var ErrPhoneRegistered = errors.New("phone already registered")
@@ -197,6 +198,54 @@ func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error)  {
 	return payFavorite, nil
 }
 
+type testServiceUser struct {
+	*Service
+}
+
+func mewTestServiceUser() *testServiceUser {
+	return &testServiceUser{Service: &Service{}}
+}
+
+type testAccountUser struct {
+	phone types.Phone
+	balance types.Money
+	payments []struct {
+		amount types.Money
+		category types.PaymentCategory
+	}
+}
+
+var defaultTestAccountUser = testAccountUser {
+	phone: "+992000000077",
+	balance: 55_000_00,
+	payments: []struct {
+		amount types.Money
+		category types.PaymentCategory	
+	}{
+		{amount: 5_000_00, category: "relax"},
+	},
+}
+
+func (s *testServiceUser) addAccountUser(data testAccountUser) (*types.Account, []*types.Payment, error) {
+	account, err := s.RegisterAccount(data.phone)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't register account, error = %v", err)
+	}
+
+	err = s.Deposit(account.ID, data.balance)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't deposit account, error = %v", err)
+	}
+
+	payments := make([]*types.Payment, len(data.payments))
+	for i, payment := range data.payments {
+		payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
+		if err != nil {
+			return nil, nil, fmt.Errorf("can't make payment, error = %v", err)
+		}
+	}
+	return account, payments, nil
+}
 func (s *Service) ExportToFile(path string) error {
 	file, err := os.Create(path)
 	if err != nil {
