@@ -252,7 +252,7 @@ func (s *Service) ExportToFile(path string) error {
 		log.Print(err)
 		return ErrFileNotFound
 	}
-	defer func() {
+	defer func () {
 		if cerr := file.Close(); cerr != nil {
 			log.Print(cerr)
 		}

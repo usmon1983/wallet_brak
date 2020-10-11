@@ -6,5 +6,11 @@ import (
 )
 func main()  {
 	vc := &wallet.Service{}
-	vc.ExportToFile("data/exp.txt")
+	vc .RegisterAccount("+992000000077")
+	vc.Deposit(1, 10)
+	vc .RegisterAccount("+992000000088")
+	vc.Deposit(2, 20)
+	vc .RegisterAccount("+992000000099")
+	vc.Deposit(3, 30)
+	vc.ExportToFile("D:/projectsGo/wallet/data/exp.txt")
 }
