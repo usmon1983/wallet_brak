@@ -5,6 +5,9 @@ import (
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
+	"os"
+	"log"
+	"strconv"
 )
 
 var ErrPhoneRegistered = errors.New("phone already registered")
@@ -13,6 +16,7 @@ var ErrAccountNotFound = errors.New("account not found")
 var ErrNotEnoughBalance = errors.New("balance is null")
 var ErrPaymentNotFound = errors.New("payment not found")
 var ErrFavoriteNotFound = errors.New("favorite not found")
+var ErrFileNotFound = errors.New("file not found")
 
 type Service struct {
 	nextAccountID int64 //Для генерации уникального номера аккаунта
@@ -191,4 +195,33 @@ func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error)  {
 	}
 
 	return payFavorite, nil
+}
+
+func (s *Service) ExportToFile(path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		log.Print(err)
+		return ErrFileNotFound
+	}
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			log.Print(cerr)
+		}
+	}()
+	data := ""
+	for _, account := range s.accounts {
+		id := strconv.Itoa(int(account.ID)) + ";"
+		phone := string(account.Phone) + ";"
+		balance := strconv.Itoa(int(account.Balance))
+
+		data += id
+		data += phone
+		data += balance + " "
+	}
+	_, err = file.Write([]byte(data))
+	if err != nil {
+		log.Print(err)
+		return ErrFileNotFound
+	}
+	return nil
 }
