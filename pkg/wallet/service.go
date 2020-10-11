@@ -265,7 +265,7 @@ func (s *Service) ExportToFile(path string) error {
 
 		data += id
 		data += phone
-		data += balance + " "
+		data += balance + "|"
 	}
 	_, err = file.Write([]byte(data))
 	if err != nil {
