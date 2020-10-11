@@ -12,5 +12,5 @@ func main()  {
 	vc.Deposit(2, 20)
 	vc .RegisterAccount("+992000000099")
 	vc.Deposit(3, 30)
-	vc.ExportToFile("D:/projectsGo/wallet/data/exp.txt")
+	vc.ExportToFile("data/exp.txt")
 }
