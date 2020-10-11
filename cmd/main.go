@@ -6,5 +6,5 @@ import (
 )
 func main()  {
 	vc := &wallet.Service{}
-	vc.ExportToFile("D:/projectsGo/file/data/exp.txt")
+	vc.ExportToFile("data/exp.txt")
 }
