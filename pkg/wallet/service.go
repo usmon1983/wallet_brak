@@ -5,6 +5,12 @@ import (
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
+	"os"
+	"log"
+	"strconv"
+	"fmt"
+	"io"
+	"strings"
 )
 
 var ErrPhoneRegistered = errors.New("phone already registered")
@@ -13,6 +19,7 @@ var ErrAccountNotFound = errors.New("account not found")
 var ErrNotEnoughBalance = errors.New("balance is null")
 var ErrPaymentNotFound = errors.New("payment not found")
 var ErrFavoriteNotFound = errors.New("favorite not found")
+var ErrFileNotFound = errors.New("file not found")
 
 type Service struct {
 	nextAccountID int64 //Для генерации уникального номера аккаунта
@@ -191,4 +198,133 @@ func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error)  {
 	}
 
 	return payFavorite, nil
+}
+
+type testServiceUser struct {
+	*Service
+}
+
+func mewTestServiceUser() *testServiceUser {
+	return &testServiceUser{Service: &Service{}}
+}
+
+type testAccountUser struct {
+	phone types.Phone
+	balance types.Money
+	payments []struct {
+		amount types.Money
+		category types.PaymentCategory
+	}
+}
+
+var defaultTestAccountUser = testAccountUser {
+	phone: "+992000000077",
+	balance: 55_000_00,
+	payments: []struct {
+		amount types.Money
+		category types.PaymentCategory	
+	}{
+		{amount: 5_000_00, category: "relax"},
+	},
+}
+
+func (s *testServiceUser) addAccountUser(data testAccountUser) (*types.Account, []*types.Payment, error) {
+	account, err := s.RegisterAccount(data.phone)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't register account, error = %v", err)
+	}
+
+	err = s.Deposit(account.ID, data.balance)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can't deposit account, error = %v", err)
+	}
+
+	payments := make([]*types.Payment, len(data.payments))
+	for i, payment := range data.payments {
+		payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
+		if err != nil {
+			return nil, nil, fmt.Errorf("can't make payment, error = %v", err)
+		}
+	}
+	return account, payments, nil
+}
+func (s *Service) ExportToFile(path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		log.Print(err)
+		return ErrFileNotFound
+	}
+	defer func () {
+		if cerr := file.Close(); cerr != nil {
+			log.Print(cerr)
+		}
+	}()
+	data := ""
+	for _, account := range s.accounts {
+		id := strconv.Itoa(int(account.ID)) + ";"
+		phone := string(account.Phone) + ";"
+		balance := strconv.Itoa(int(account.Balance))
+
+		data += id
+		data += phone
+		data += balance + "|"
+	}
+	_, err = file.Write([]byte(data))
+	if err != nil {
+		log.Print(err)
+		return ErrFileNotFound
+	}
+	return nil
+}
+
+func (s *Service) ImportFromFile(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Print(err)
+		return ErrFileNotFound
+	}
+	defer func () {
+		if cerr := file.Close(); cerr != nil {
+			log.Print(cerr)
+		}
+	}()
+	
+	content := make([]byte, 0)
+	buf := make([]byte, 4)
+	for {
+		read, err := file.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		
+		if err != nil {
+			log.Print(err)
+			return ErrFileNotFound
+		}
+		content = append(content, buf[:read]...)
+	}
+	data := string(content)
+	accounts := strings.Split(data, "|")
+	accounts = accounts[:len(accounts) - 1]
+	
+	for _, account := range accounts {
+		value := strings.Split(account, ";")
+		id, err := strconv.Atoi(value[0])
+		if err != nil {
+			log.Print(err)
+		}
+		phone := types.Phone(value[1])
+		balance, err := strconv.Atoi(value[2])
+		if err != nil {
+			log.Print(err)
+		}
+		editAccount := &types.Account {
+			ID: int64(id),
+			Phone: phone,
+			Balance: types.Money(balance),
+		}
+		s.accounts = append(s.accounts, editAccount)
+		log.Print(account)
+	}
+	return nil
 }
