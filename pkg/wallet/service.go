@@ -351,7 +351,7 @@ func (s *Service) Export(dir string) error {
 
 			data += id
 			data += phone
-			data += balance + "|"
+			data += balance + "\n"
 		}
 		_, acc_err := file.Write([]byte(data))
 		if acc_err != nil {
@@ -384,7 +384,7 @@ func (s *Service) Export(dir string) error {
 			data_payment += accountID
 			data_payment += amount
 			data_payment += category
-			data_payment += status + "|"
+			data_payment += status + "\n"
 		}
 		_, pay_err := file.Write([]byte(data_payment))
 		if pay_err != nil {
@@ -416,7 +416,7 @@ func (s *Service) Export(dir string) error {
 			data_favorite += accountID
 			data_favorite += name
 			data_favorite += amountFavorite
-			data_favorite += categoryFavorite + "|"
+			data_favorite += categoryFavorite + "\n"
 		}
 		_, fav_err := file.Write([]byte(data_favorite))
 		if fav_err != nil {
@@ -456,7 +456,7 @@ func (s *Service) Import(dir string) error {
 			content = append(content, buf[:read]...)
 		}
 		data := string(content)
-		accounts := strings.Split(data, "|")
+		accounts := strings.Split(data, "\n")
 		accounts = accounts[:len(accounts) - 1]
 		
 		for _, account := range accounts {
@@ -507,8 +507,8 @@ func (s *Service) Import(dir string) error {
 			}
 			content = append(content, buf[:read]...)
 		}
-		dataPayment := string(content)
-		payments := strings.Split(dataPayment, "\n")
+		data_payment := string(content)
+		payments := strings.Split(data_payment, "\n")
 		payments = payments[:len(payments) - 1]
 		
 		for _, payment := range payments {
@@ -536,7 +536,7 @@ func (s *Service) Import(dir string) error {
 		}
 	}
 
-	fileFavorites := dir + "/payments.dump"
+	fileFavorites := dir + "/favorites.dump"
 	fileFav, err := os.Open(fileFavorites)
 	if err != nil {
 		log.Print(err)
@@ -563,8 +563,8 @@ func (s *Service) Import(dir string) error {
 			}
 			content = append(content, buf[:read]...)
 		}
-		dataFavorite := string(content)
-		favorites := strings.Split(dataFavorite, "\n")
+		data_favorite := string(content)
+		favorites := strings.Split(data_favorite, "\n")
 		favorites = favorites[:len(favorites) - 1]
 		
 		for _, favorite := range favorites {
