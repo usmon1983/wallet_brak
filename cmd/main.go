@@ -6,5 +6,7 @@ import (
 
 func main()  {
 	vc := &wallet.Service{}
-	vc.ImportFromFile("data/exp.txt")
+	//vc.ImportFromFile("data/exp.txt")
+	//vc.Export("d:/projectsGo/wallet/data")
+	vc.Import("d:/projectsGo/wallet/data")
 }
