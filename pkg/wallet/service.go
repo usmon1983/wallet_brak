@@ -392,7 +392,7 @@ func (s *Service) Export(dir string) error {
 			return ErrFileNotFound
 		}
 	}
-	if len(s.payments) != 0 {
+	if len(s.favorites) != 0 {
 		fileFavorites := dir + "/favorites.dump"
 		file, err := os.Create(fileFavorites)
 		if err != nil {
