@@ -594,3 +594,51 @@ func (s *Service) Import(dir string) error {
 
 	return nil
 }
+
+func (s *Service) ExportAccountHistory(accountID int64) ([]types.Payment, error) {
+	var paymentByAccount []types.Payment
+	
+	for _, payment := range s.payments {
+		if payment.AccountID != accountID {
+			return nil, ErrAccountNotFound
+		}
+		paymentByAccount = append(paymentByAccount, *payment)
+	}
+	return paymentByAccount, nil
+}
+
+func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records int) error {
+	if len(payments) < records {
+		filePayments := dir + "/payments.dump"
+			file, err := os.Create(filePayments)
+			if err != nil {
+				log.Print(err)
+				return ErrFileNotFound
+			}
+			defer func () {
+				if cerr := file.Close(); cerr != nil {
+					log.Print(cerr)
+				}
+			}()
+			data_payment := ""
+			for _, payment := range payments {
+				id := payment.ID + ";"
+				accountID := strconv.Itoa(int(payment.AccountID)) + ";"
+				amount := strconv.Itoa(int(payment.Amount)) + ";"
+				category := string(payment.Category) + ";"
+				status := string(payment.Status)
+
+				data_payment += id
+				data_payment += accountID
+				data_payment += amount
+				data_payment += category
+				data_payment += status + "\n"
+			}
+			_, pay_err := file.Write([]byte(data_payment))
+			if pay_err != nil {
+				log.Print(pay_err)
+				return ErrFileNotFound
+			}
+	}
+	return nil
+}
