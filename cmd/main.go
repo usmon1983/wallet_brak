@@ -10,7 +10,7 @@ func main()  {
 	//vc.ImportFromFile("data/exp.txt")
 	//vc.Export("/data")
 	//vc.Import("/data")
-	paymentsExport, err := vc.ExportAccountHistory(100)
+	paymentsExport, err := vc.ExportAccountHistory(1)
 	if err != nil {
 		log.Print(err)
 		return
