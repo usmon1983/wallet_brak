@@ -190,9 +190,75 @@ func TestService_PayFromFavorite_success(t *testing.T) {
 	}
 }
 
+func TestService_ExportToFile_success(t *testing.T) {
+	var vc Service
+	vc.RegisterAccount("+992000000077")
+	vc.RegisterAccount("+992000000088")
+	vc.RegisterAccount("+992000000099")
+
+	err := vc.ExportToFile("export.txt")
+	if err != nil {
+		t.Errorf("ExportToFile return not nil error, err = %v", err)
+	}
+}
+
+func TestService_ImportFromFile_success(t *testing.T) {
+	var vc Service
+	err := vc.ImportFromFile("export.txt")
+	if err != nil {
+		t.Errorf("ImportFromFile return not nil error, err = %v", err)
+	}
+}
+
+func TestService_Export_success(t *testing.T) {
+	var vc Service
+	vc.RegisterAccount("+992000000100")
+	vc.RegisterAccount("+992000000101")
+	vc.RegisterAccount("+992000000102")
+
+	err := vc.Export("/data")
+	if err != nil {
+		t.Errorf("Export return not nil error, err = %v", err)
+	}
+}
+
+func TestService_Import_success(t *testing.T) {
+	var vc Service
+	err := vc.Import("/data")
+	if err != nil {
+		t.Errorf("Import return not nil error, err = %v", err)
+	}
+}
+
+func TestService_ExportAccountHistory_success(t *testing.T){
+	var vc Service
+	account, err := vc.RegisterAccount("+992000000077")
+	if err != nil {
+		t.Errorf("RegisterAccount returned not nil error, account = %v", account)
+	}
+	
+	err = vc.Deposit(1, 100_00)
+	if err != nil {
+		t.Errorf("Deposit returned not nil error, error = %v", err)
+	}
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+
+	payments, err := vc.ExportAccountHistory(account.ID)
+	if err != nil {
+		t.Errorf("ExportAccountHistory returned not nil error, error = %v", err)
+	}
+
+	err = vc.HistoryToFiles(payments, "/data", 2)
+	if err != nil {
+		t.Errorf("HistoryToFiles returned not nil error, error = %v", err)
+	}
+}
 func BenchmarkSumPayments(b *testing.B) {
 	var vc Service
-	//можем сначала сгенерировать данные, если нужны
 	account, err := vc.RegisterAccount("+992000000077")
 	if err != nil {
 		b.Errorf("method RegisterAccount returned not nil error, account = %v", account)
