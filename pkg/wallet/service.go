@@ -608,11 +608,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]types.Payment, error)
 }
 
 func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records int) error {
-	if payments == nil {
-		log.Print(ErrPaymentNotFound)
-		return nil
-	}
-	//if len(payments) > 0 {
+	if len(payments) > 0 {
 		if len(payments) <= records {
 			filePayments := dir + "/payments.dump"
 				file, err := os.Create(filePayments)
@@ -667,5 +663,6 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 				}
 			}
 		}
+	}
 	return nil
 }
