@@ -2,7 +2,7 @@ package wallet
 
 
 import (
-	//"io/ioutil"
+	"sync"
 	"github.com/usmon1983/wallet/pkg/types"
 	"github.com/google/uuid"
 	"errors"
@@ -675,4 +675,40 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 		}
 	}
 	return nil
+}
+
+func (s *Service) SumPayments(goroutines int) types.Money {
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+	sum := int64(0)
+
+	if goroutines <= 1 {
+		wg.Add(1)
+		go func()  {
+			defer wg.Done()
+			for _, payment := range s.payments {
+				mu.Lock()
+				sum += int64(payment.Amount)
+				mu.Unlock()
+			}		
+		}()
+		wg.Wait()
+	}
+
+	if goroutines > 1 {
+		for i := 0; i < goroutines - 1; i++ {
+			wg.Add(1)
+			go func (val int)  {
+				defer wg.Done()
+				for _, payment := range s.payments {
+					mu.Lock()
+					sum += int64(payment.Amount)
+					mu.Unlock()
+				}
+			}(i)
+		}
+		wg.Wait()
+	}
+	
+	return types.Money(sum)
 }

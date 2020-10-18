@@ -3,6 +3,7 @@ package wallet
 import (
 	"testing"
 	"github.com/usmon1983/wallet/pkg/types"
+	//"fmt"
 )
 
 func TestService_RegisterAccount_success(t *testing.T) {
@@ -186,5 +187,30 @@ func TestService_PayFromFavorite_success(t *testing.T) {
 	payFromFavorite, err := vc.PayFromFavorite(favoritePay.ID)
 	if err != nil {
 		t.Errorf("PayFromFavorite(): Error(): can't create payment from favorite(%v): %v", payFromFavorite, err)
+	}
+}
+
+func BenchmarkSumPayments(b *testing.B) {
+	var vc Service
+	//можем сначала сгенерировать данные, если нужны
+	account, err := vc.RegisterAccount("+992000000077")
+	if err != nil {
+		b.Errorf("method RegisterAccount returned not nil error, account = %v", account)
+	}
+	
+	err = vc.Deposit(1, 100_00)
+	if err != nil {
+		b.Errorf("method Deposit returned not nil error, error = %v", err)
+	}
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+	_, err = vc.Pay(1, 10, "Service center")
+
+	want := types.Money(50)
+	got := vc.SumPayments(2)
+	if want != got {
+		b.Errorf("want = %v got = %v", want, got)
 	}
 }
