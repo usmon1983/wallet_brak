@@ -645,44 +645,27 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 					return ErrFileNotFound
 				}
 		} else {
-			counterPayments := len(payments)
+			var str string
+			t := 0
 			counterFile := 1
-			data_payment := ""
+			var file *os.File
 			for _, payment := range payments {
-				filePayments := dir + "/payments" + fmt.Sprint(counterFile) + ".dump"
-				file, err := os.Create(filePayments)
+				if t == 0 {
+					file, _ = os.OpenFile(dir + "/payments" + fmt.Sprint(counterFile) + ".dump", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+				}
+				t += 1
+				str = fmt.Sprint(payment.ID) + ";" + fmt.Sprint(payment.AccountID) + ";" + fmt.Sprint(payment.Amount) + ";" + fmt.Sprint(payment.Category) + ";" + fmt.Sprint(payment.Status) + "\n"
+				_, err := file.WriteString(str)
 				if err != nil {
 					log.Print(err)
-					return ErrFileNotFound
 				}
-				defer func () {
-					if cerr := file.Close(); cerr != nil {
-						log.Print(cerr)
-					}
-				}()
-				id := payment.ID + ";"
-				accountID := strconv.Itoa(int(payment.AccountID)) + ";"
-				amount := strconv.Itoa(int(payment.Amount)) + ";"
-				category := string(payment.Category) + ";"
-				status := string(payment.Status)
-
-				data_payment += id
-				data_payment += accountID
-				data_payment += amount
-				data_payment += category
-				data_payment += status + "\n"
-				_, pay_err := file.Write([]byte(data_payment))
-				if pay_err != nil {
-					log.Print(pay_err)
-					return ErrFileNotFound
+				if t == records {
+					str = ""
+					counterFile++
+					t = 0
+					file.Close()
 				}
-
-				counterPayments = counterPayments - records
-				if counterPayments > records {
-					counterFile += 1
-				} 
 			}
-			
 		}
 	return nil
 }
