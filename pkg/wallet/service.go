@@ -612,20 +612,54 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 		log.Print(ErrPaymentNotFound)
 		return nil
 	}
-	if len(payments) < records {
-		filePayments := dir + "/payments.dump"
-			file, err := os.Create(filePayments)
-			if err != nil {
-				log.Print(err)
-				return ErrFileNotFound
-			}
-			defer func () {
-				if cerr := file.Close(); cerr != nil {
-					log.Print(cerr)
+	//if len(payments) > 0 {
+		if len(payments) <= records {
+			filePayments := dir + "/payments.dump"
+				file, err := os.Create(filePayments)
+				if err != nil {
+					log.Print(err)
+					return ErrFileNotFound
 				}
-			}()
+				defer func () {
+					if cerr := file.Close(); cerr != nil {
+						log.Print(cerr)
+					}
+				}()
+				data_payment := ""
+				for _, payment := range payments {
+					id := payment.ID + ";"
+					accountID := strconv.Itoa(int(payment.AccountID)) + ";"
+					amount := strconv.Itoa(int(payment.Amount)) + ";"
+					category := string(payment.Category) + ";"
+					status := string(payment.Status)
+
+					data_payment += id
+					data_payment += accountID
+					data_payment += amount
+					data_payment += category
+					data_payment += status + "\n"
+				}
+				_, pay_err := file.Write([]byte(data_payment))
+				if pay_err != nil {
+					log.Print(pay_err)
+					return ErrFileNotFound
+				}
+		} else {
+			counterPayments := len(payments)
+			counterFile := 1
 			data_payment := ""
 			for _, payment := range payments {
+				filePayments := dir + "/payments" + fmt.Sprint(counterFile) + ".dump"
+				file, err := os.Create(filePayments)
+				if err != nil {
+					log.Print(err)
+					return ErrFileNotFound
+				}
+				defer func () {
+					if cerr := file.Close(); cerr != nil {
+						log.Print(cerr)
+					}
+				}()
 				id := payment.ID + ";"
 				accountID := strconv.Itoa(int(payment.AccountID)) + ";"
 				amount := strconv.Itoa(int(payment.Amount)) + ";"
@@ -637,12 +671,18 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 				data_payment += amount
 				data_payment += category
 				data_payment += status + "\n"
+				_, pay_err := file.Write([]byte(data_payment))
+				if pay_err != nil {
+					log.Print(pay_err)
+					return ErrFileNotFound
+				}
+
+				counterPayments = counterPayments - records
+				if counterPayments > records {
+					counterFile += 1
+				} 
 			}
-			_, pay_err := file.Write([]byte(data_payment))
-			if pay_err != nil {
-				log.Print(pay_err)
-				return ErrFileNotFound
-			}
-	}
+			
+		}
 	return nil
 }
