@@ -596,15 +596,25 @@ func (s *Service) Import(dir string) error {
 }
 
 func (s *Service) ExportAccountHistory(accountID int64) ([]types.Payment, error) {
-	var paymentByAccount []types.Payment
-	
-	for _, payment := range s.payments {
-		if payment.AccountID != accountID {
-			return nil, ErrAccountNotFound
-		}
-		paymentByAccount = append(paymentByAccount, *payment)
+	account, err := s.FindAccountByID(accountID)
+	if err != nil {
+		return nil, err
 	}
-	return paymentByAccount, nil
+
+	var payments []types.Payment
+	for _, v := range s.payments {
+		if v.AccountID == account.ID {
+			data := types.Payment {
+				ID: v.ID,
+				AccountID: v.AccountID,
+				Amount: v.Amount,
+				Category: v.Category,
+				Status: v.Status,
+			}
+			payments = append(payments, data)
+		}
+	}
+	return payments, nil
 }
 
 func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records int) error {
